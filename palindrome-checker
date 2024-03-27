@@ -1,0 +1,28 @@
+
+// First version:
+
+function palindrome(str) {
+    
+    let str1 = str.toLowerCase();                   // 'str' to lowercase
+    let str2 = str1.replace(/[^A-Za-z0-9]+/g, "");  // removes everything but letters and numbers
+    let str3 = str2.split("").reverse().join("");   // reversing the string
+    
+    if (str2 === str3) {
+        return true;
+    } else {
+        return false;
+    }
+    
+}
+
+*****************************
+
+// Cleaned-up Version:
+
+function palindrome(str) {
+
+    let cleanedStr = str.toLowerCase().replace(/[^a-z0-9]/g, "");
+    let reversedStr = cleanedStr.split("").reverse().join("");
+    return cleanedStr === reversedStr;
+
+}
