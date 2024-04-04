@@ -1,0 +1,70 @@
+function checkCashRegister(price, cash, cid) {
+
+    let changeDue = Math.round((cash - price) * 100); // Convert to cents to avoid precision issues
+    
+    let totalInDrawer = Math.round(cid.reduce((acc, curr) => acc + curr[1] * 100, 0)); // Total in cents
+
+    let giveChange = 
+    {
+        status: "",
+        change: []
+    };
+
+    if (totalInDrawer < changeDue) {
+        giveChange.status = "INSUFFICIENT_FUNDS";
+        giveChange.change = [];
+        return giveChange; // Early return to stop execution if condition is met
+    }
+
+    if (totalInDrawer === changeDue) {
+        giveChange.status = "CLOSED";
+        giveChange.change = cid;
+        return giveChange; // Early return to stop execution if condition is met
+    }
+
+    const denominations = [ // Sorted from highest to lowest
+        ["ONE HUNDRED", 10000],
+        ["TWENTY", 2000],
+        ["TEN", 1000],
+        ["FIVE", 500],
+        ["ONE", 100],
+        ["QUARTER", 25],
+        ["DIME", 10],
+        ["NICKEL", 5],
+        ["PENNY", 1]
+    ];
+
+    let changeArray = []; // To hold the change to give back
+    let availableChange = cid.reverse().map(el => [el[0], Math.round(el[1] * 100)]); // Convert cid to cents and order ascending
+
+    for (let [denom, denomValue] of denominations) {
+        let amountInDrawer = availableChange.find(el => el[0] === denom)[1];
+        let amountToReturn = 0;
+        while (changeDue >= denomValue && amountInDrawer > 0) {
+            changeDue -= denomValue; // Reduce the change due
+            amountInDrawer -= denomValue; // Reduce the amount in drawer
+            amountToReturn += denomValue; // Increase the amount to return
+        }
+        if (amountToReturn > 0) {
+            changeArray.push([denom, amountToReturn / 100]); // Convert back to dollars and add to change array
+        }
+    }
+
+    // If we couldn't return the exact change due
+    if (changeDue > 0) {
+        return {status: "INSUFFICIENT_FUNDS", change: []};
+    }
+
+    // Check if we have emptied the drawer
+    let isDrawerEmpty = changeArray.reduce((acc, curr) => acc + curr[1], 0) === totalInDrawer / 100;
+
+    if (isDrawerEmpty) {
+        giveChange.status = "CLOSED";
+        giveChange.change = cid.map(el => [el[0], el[1] / 100]); // Convert everything back to dollars
+    } else {
+        giveChange.status = "OPEN";
+        giveChange.change = changeArray;
+    }
+
+    return giveChange;
+}
